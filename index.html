@@ -9,193 +9,89 @@
 <body class="bg-gray-100 min-h-screen p-6">
 
   <div class="max-w-[1800px] mx-auto">
-   
+    <!-- Header Section -->
+    <div class="flex justify-between items-center mb-6 bg-white p-4 rounded-xl shadow-sm border border-gray-200">
+      <div>
+        <h1 class="text-2xl font-bold text-gray-800">Vine Live Catalog</h1>
+        <p class="text-sm text-gray-500">Auto-synced with GitHub Data Store</p>
+      </div>
+      <button onclick="loadProducts()" class="bg-gray-800 hover:bg-gray-900 text-white px-4 py-2 rounded-lg text-sm font-medium transition flex items-center gap-2">
+        🔄 Refresh Catalog
+      </button>
     </div>
 
     <!-- Product Grid (6 per row on large screens) -->
     <div id="productGrid" class="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 xl:grid-cols-6 gap-4">
       <!-- Products will be loaded here dynamically -->
-      <p class="col-span-full text-center text-gray-500">Products load ho rahe hain...</p>
-    </div>
-  </div>
-
-  <!-- Manual Add Modal -->
-  <div id="manualModal" class="hidden fixed inset-0 bg-black/50 flex items-center justify-center p-4 z-50">
-    <div class="bg-white rounded-xl p-6 max-w-md w-full shadow-2xl space-y-4">
-      <h2 class="text-xl font-bold text-gray-800">Manually Add Product</h2>
-      
-      <div>
-        <label class="block text-sm font-medium text-gray-700 mb-1">Amazon ASIN / URL</label>
-        <div class="flex gap-2">
-          <input type="text" id="asinInput" placeholder="B09X123456" class="w-full p-2 border rounded-lg text-sm">
-          <button onclick="extractDetails()" class="bg-gray-800 text-white px-3 py-2 rounded-lg text-sm whitespace-nowrap">Fetch</button>
-        </div>
-      </div>
-
-      <div>
-        <label class="block text-sm font-medium text-gray-700 mb-1">Product Title</label>
-        <input type="text" id="titleInput" class="w-full p-2 border rounded-lg text-sm">
-      </div>
-
-      <div class="grid grid-cols-2 gap-2">
-        <div>
-          <label class="block text-sm font-medium text-gray-700 mb-1">MRP (₹)</label>
-          <input type="number" id="mrpInput" class="w-full p-2 border rounded-lg text-sm">
-        </div>
-        <div>
-          <label class="block text-sm font-medium text-gray-700 mb-1">Offer Price (₹)</label>
-          <input type="number" id="priceInput" class="w-full p-2 border rounded-lg text-sm">
-        </div>
-      </div>
-
-      <div>
-        <label class="block text-sm font-medium text-gray-700 mb-1">Image URL</label>
-        <input type="text" id="imageInput" class="w-full p-2 border rounded-lg text-sm">
-      </div>
-
-      <div>
-        <label class="block text-sm font-medium text-gray-700 mb-1">Product Link</label>
-        <input type="text" id="urlInput" class="w-full p-2 border rounded-lg text-sm">
-      </div>
-
-      <div>
-        <label class="block text-sm font-medium text-gray-700 mb-1">GitHub Personal Access Token (PAT)</label>
-        <input type="password" id="githubToken" placeholder="ghp_xxxx..." class="w-full p-2 border rounded-lg text-sm">
-        <p class="text-xs text-gray-500 mt-1">Direct website se GitHub commit karne ke liye token chahiye.</p>
-      </div>
-
-      <div class="flex justify-end gap-2 pt-2">
-        <button onclick="closeManualModal()" class="px-4 py-2 border rounded-lg text-sm">Cancel</button>
-        <button onclick="saveProductToGitHub()" class="px-4 py-2 bg-green-600 text-white rounded-lg text-sm font-medium">Save Product</button>
-      </div>
+      <p class="col-span-full text-center text-gray-500 py-10">Products load ho rahe hain...</p>
     </div>
   </div>
 
   <script>
-    const REPO_OWNER = 'YOUR_GITHUB_USERNAME'; // Apana GitHub Username dalein
-    const REPO_NAME = 'YOUR_REPO_NAME';       // Apni Repo ka naam dalein
     const FILE_PATH = 'data.json';
-
     let currentProducts = [];
-    let fileSha = '';
 
     // Data Load Function
     async function loadProducts() {
+      const grid = document.getElementById('productGrid');
+      grid.innerHTML = `<p class="col-span-full text-center text-gray-500 py-10">Refreshing catalog...</p>`;
+
       try {
         // Cache bypass karne ke liye timestamp query parameter
         const response = await fetch(`./${FILE_PATH}?t=${Date.now()}`);
         if (!response.ok) throw new Error("Data fail");
         currentProducts = await response.json();
 
-        // Newest First Sort
-        currentProducts.sort((a, b) => new Date(b.createdAt) - new Date(a.createdAt));
+        // Newest First Sort (Naya Product Sabse Pehle/Top Par)
+        currentProducts.sort((a, b) => {
+          const timeA = new Date(a.createdAt || a.firstSeenAt || 0).getTime();
+          const timeB = new Date(b.createdAt || b.firstSeenAt || 0).getTime();
+          return timeB - timeA;
+        });
 
         renderGrid();
       } catch (err) {
-        document.getElementById('productGrid').innerHTML = `<p class="col-span-full text-center text-red-500">Data load nahi ho paaya. data.json check karein.</p>`;
+        grid.innerHTML = `<p class="col-span-full text-center text-red-500 py-10">Data load nahi ho paaya. Check karein ki data.json file exist karti hai ya nahi.</p>`;
       }
     }
 
     function renderGrid() {
       const grid = document.getElementById('productGrid');
-      if (currentProducts.length === 0) {
-        grid.innerHTML = `<p class="col-span-full text-center text-gray-500">Koi product nahi mila.</p>`;
+      if (!currentProducts || currentProducts.length === 0) {
+        grid.innerHTML = `<p class="col-span-full text-center text-gray-500 py-10">Koi product nahi mila.</p>`;
         return;
       }
 
-      grid.innerHTML = currentProducts.map(p => `
-        <div class="bg-white rounded-xl shadow-sm hover:shadow-md border border-gray-200 overflow-hidden flex flex-col justify-between transition">
-          <div>
-            <div class="h-44 bg-gray-50 p-4 flex items-center justify-center">
-              <img src="${p.image || 'https://via.placeholder.com/200'}" alt="${p.title}" class="max-h-full max-w-full object-contain">
-            </div>
-            <div class="p-3">
-              <h3 class="text-xs font-semibold text-gray-800 line-clamp-2 mb-2" title="${p.title}">${p.title}</h3>
-              <div class="flex items-baseline gap-2 mb-2">
-                <span class="text-base font-bold text-green-700">₹${p.price}</span>
-                ${p.mrp ? `<span class="text-xs text-gray-400 line-through">₹${p.mrp}</span>` : ''}
+      grid.innerHTML = currentProducts.map(p => {
+        const title = p.title || 'Amazon Vine Product';
+        const img = p.image || 'https://via.placeholder.com/200';
+        const price = p.price && p.price !== "0" ? `₹${p.price}` : 'Free (Vine)';
+        const mrp = p.mrp && p.mrp !== "0" ? `₹${p.mrp}` : null;
+        const timeBadge = p.firstSeenAt || '';
+
+        return `
+          <div class="bg-white rounded-xl shadow-sm hover:shadow-md border border-gray-200 overflow-hidden flex flex-col justify-between transition relative">
+            ${timeBadge ? `<span class="absolute top-2 right-2 bg-green-600 text-white text-[10px] font-bold px-2 py-0.5 rounded-md shadow">${timeBadge}</span>` : ''}
+            <div>
+              <div class="h-44 bg-gray-50 p-4 flex items-center justify-center">
+                <img src="${img}" alt="${title}" class="max-h-full max-w-full object-contain">
+              </div>
+              <div class="p-3">
+                <h3 class="text-xs font-semibold text-gray-800 line-clamp-2 mb-2" title="${title}">${title}</h3>
+                <div class="flex items-baseline gap-2 mb-2">
+                  <span class="text-base font-bold text-green-700">${price}</span>
+                  ${mrp ? `<span class="text-xs text-gray-400 line-through">${mrp}</span>` : ''}
+                </div>
               </div>
             </div>
+            <div class="p-3 pt-0">
+              <a href="${p.url}" target="_blank" class="block text-center bg-amber-400 hover:bg-amber-500 text-gray-900 text-xs font-bold py-2 px-3 rounded-lg transition">
+                Buy / View Now
+              </a>
+            </div>
           </div>
-          <div class="p-3 pt-0">
-            <a href="${p.url}" target="_blank" class="block text-center bg-amber-400 hover:bg-amber-500 text-gray-900 text-xs font-bold py-2 px-3 rounded-lg transition">
-              Buy Now
-            </a>
-          </div>
-        </div>
-      `).join('');
-    }
-
-    // Modal Operations
-    function openManualModal() { document.getElementById('manualModal').classList.remove('hidden'); }
-    function closeManualModal() { document.getElementById('manualModal').classList.add('hidden'); }
-
-    // ASIN Dummy Extractor (Client-side CORS limit ki wajah se)
-    function extractDetails() {
-      const val = document.getElementById('asinInput').value.trim();
-      if (!val) return alert("ASIN ya URL daalein");
-
-      const asinMatch = val.match(/(?:dp\/|gp\/product\/|ASIN=)([A-Z0-9]{10})/i) || val.match(/^[A-Z0-9]{10}$/i);
-      const asin = asinMatch ? asinMatch[1] || asinMatch[0] : 'B08N5WRWNW';
-
-      document.getElementById('titleInput').value = `Sample Amazon Product (${asin})`;
-      document.getElementById('mrpInput').value = "1999";
-      document.getElementById('priceInput').value = "899";
-      document.getElementById('imageInput').value = `https://m.media-amazon.com/images/I/71wF7YDIQLL._SL1500_.jpg`;
-      document.getElementById('urlInput').value = `https://www.amazon.in/dp/${asin}?tag=yourtag-21`;
-    }
-
-    // Directly Commit to GitHub using GitHub API
-    async function saveProductToGitHub() {
-      const token = document.getElementById('githubToken').value.trim();
-      if (!token) return alert("GitHub Token zaroori hai browser se direct commit karne ke liye.");
-
-      const newProduct = {
-        id: Date.now().toString(),
-        title: document.getElementById('titleInput').value,
-        mrp: document.getElementById('mrpInput').value,
-        price: document.getElementById('priceInput').value,
-        image: document.getElementById('imageInput').value,
-        url: document.getElementById('urlInput').value,
-        createdAt: new Date().toISOString()
-      };
-
-      try {
-        // 1. Get SHA of data.json
-        const getRes = await fetch(`https://api.github.com/repos/${REPO_OWNER}/${REPO_NAME}/contents/${FILE_PATH}`, {
-          headers: { 'Authorization': `token ${token}` }
-        });
-        const getData = await getRes.json();
-        const currentContent = JSON.parse(atob(getData.content));
-        const fileSha = getData.sha;
-
-        // 2. Add new product at top
-        currentContent.unshift(newProduct);
-
-        // 3. Commit updated content
-        const putRes = await fetch(`https://api.github.com/repos/${REPO_OWNER}/${REPO_NAME}/contents/${FILE_PATH}`, {
-          method: 'PUT',
-          headers: {
-            'Authorization': `token ${token}`,
-            'Content-Type': 'application/json'
-          },
-          body: JSON.stringify({
-            message: `Add new product: ${newProduct.title}`,
-            content: btoa(unescape(encodeURIComponent(JSON.stringify(currentContent, null, 2)))),
-            sha: fileSha
-          })
-        });
-
-        if (putRes.ok) {
-          alert("Product successfully added and committed to GitHub!");
-          closeManualModal();
-          setTimeout(loadProducts, 2000); // Reload after deployment propagation
-        } else {
-          alert("Error updating GitHub repository. Check your PAT token permissions.");
-        }
-      } catch (err) {
-        alert("Failed to commit: " + err.message);
-      }
+        `;
+      }).join('');
     }
 
     // Initial Load
