@@ -1,0 +1,11 @@
+[
+  {
+    "id": "1",
+    "title": "Sample Product 1",
+    "image": "https://via.placeholder.com/300",
+    "mrp": "1999",
+    "price": "999",
+    "url": "https://amazon.in/dp/B00123456",
+    "createdAt": "2026-09-20T10:00:00Z"
+  }
+]
