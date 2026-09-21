@@ -1,480 +1,328 @@
 <!DOCTYPE html>
-<html lang="hi" class="h-full">
+<html lang="hi">
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>Amazon Vine Explore List — Presented by Gunaho ka Devta</title>
+  <title>Amazon Vine Explore List - Presented by Gunaho ka Devta</title>
   <script src="https://cdn.tailwindcss.com"></script>
-  <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700;800&display=swap" rel="stylesheet">
-  <script>
-    tailwind.config = {
-      theme: {
-        extend: {
-          fontFamily: {
-            sans: ['"Plus Jakarta Sans"', 'sans-serif'],
-          },
-          colors: {
-            brand: {
-              50: '#fdf8f6',
-              100: '#fbe8e6',
-              500: '#ff9900',
-              600: '#e88b00',
-              700: '#b26800',
-              900: '#131921',
-              800: '#232f3e',
-            }
-          }
-        }
-      }
-    }
-  </script>
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
 </head>
-<body class="bg-slate-50 text-slate-800 min-h-full flex flex-col font-sans antialiased selection:bg-amber-400 selection:text-slate-900">
+<body class="bg-slate-50 min-h-screen font-sans text-slate-800">
 
-  <header class="bg-brand-900 text-white sticky top-0 z-40 shadow-lg border-b border-slate-800">
-    <div class="max-w-[1920px] mx-auto px-4 sm:px-6 lg:px-8 py-3.5 flex flex-col md:flex-row items-center justify-between gap-4">
-      
-      <!-- Brand Identity -->
-      <div class="flex items-center gap-3.5 w-full md:w-auto justify-between md:justify-start">
-        <div class="flex items-center gap-3">
-          <div class="w-10 h-10 rounded-xl bg-gradient-to-tr from-amber-500 to-amber-300 flex items-center justify-center shadow-md text-slate-950 font-black text-xl">
-            ⚡
-          </div>
-          <div>
-            <div class="flex items-center gap-2">
-              <h1 class="text-lg sm:text-xl font-extrabold tracking-tight text-white">Amazon Vine Explore List</h1>
-              <span class="bg-amber-500/20 text-amber-300 border border-amber-500/30 text-[10px] font-bold px-2 py-0.5 rounded-full">LIVE FEED</span>
-            </div>
-            <p class="text-xs text-slate-400 font-medium">Presented by <span class="text-amber-400 font-bold">Gunaho ka Devta</span> • Auto-synced with GitHub Data Store</p>
-          </div>
-        </div>
-
-        <!-- Mobile menu toggle for sidebar -->
-        <button onclick="toggleMobileSidebar()" class="md:hidden bg-slate-800 hover:bg-slate-700 p-2 rounded-lg text-slate-300 transition">
-          <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 6h16M4 12h16M4 18h16"></path></svg>
-        </button>
-      </div>
-
-      <!-- Live Statistics & Actions -->
-      <div class="flex items-center gap-3 w-full md:w-auto justify-end">
-        <div class="hidden lg:flex items-center gap-4 bg-slate-800/80 px-3.5 py-1.5 rounded-xl border border-slate-700/50 text-xs text-slate-300">
-          <div>Total Items: <strong id="statTotal" class="text-white font-bold">0</strong></div>
-          <div class="w-px h-3 bg-slate-700"></div>
-          <div>Heavy Drops (>₹999): <strong id="statHeavy" class="text-amber-400 font-bold">0</strong></div>
-        </div>
-
-        <button onclick="loadProducts()" class="w-full md:w-auto bg-amber-500 hover:bg-amber-400 text-slate-950 px-4 py-2 rounded-xl text-xs sm:text-sm font-bold transition shadow-md flex items-center justify-center gap-2">
-          <span>🔄 Refresh Catalog</span>
-        </button>
-        
-        <button onclick="openTermsModal()" class="bg-slate-800 hover:bg-slate-700 text-slate-300 px-3 py-2 rounded-xl text-xs font-semibold transition border border-slate-700 hidden sm:block">
-          Terms
-        </button>
-      </div>
-    </div>
-  </header>
-
-  <div class="max-w-[1920px] mx-auto px-4 sm:px-6 lg:px-8 py-6 flex-1 w-full grid grid-cols-1 lg:grid-cols-4 xl:grid-cols-5 gap-6 items-start">
-
-    <!-- LEFT / RESPONSIVE SIDEBAR -->
-    <aside id="sidebar" class="fixed inset-y-0 left-0 z-50 w-80 bg-white shadow-2xl p-6 transform -translate-x-full lg:translate-x-0 lg:static lg:z-0 lg:w-auto lg:shadow-sm lg:rounded-2xl lg:border lg:border-slate-200 transition-transform duration-300 overflow-y-auto max-h-[calc(100vh-6rem)]">
-      
-      <!-- Mobile Sidebar Close Header -->
-      <div class="flex items-center justify-between mb-6 lg:hidden pb-4 border-b border-slate-100">
-        <h2 class="font-bold text-slate-800">Quick Menu & Ticker</h2>
-        <button onclick="toggleMobileSidebar()" class="text-slate-500 hover:text-slate-800 p-1">
-          <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"></path></svg>
-        </button>
-      </div>
-
-      <!-- Sidebar Section 1: Latest 10 Items Ticker -->
-      <div class="mb-8">
-        <div class="flex items-center justify-between mb-3">
-          <h3 class="text-xs font-bold uppercase tracking-wider text-slate-500 flex items-center gap-1.5">
-            <span class="w-2 h-2 rounded-full bg-emerald-500 animate-pulse"></span> Latest 10 Items
-          </h3>
-          <span class="text-[10px] bg-emerald-50 text-emerald-700 font-bold px-2 py-0.5 rounded border border-emerald-200">Live</span>
-        </div>
-        <div id="latestTicker" class="space-y-2.5 max-h-[320px] overflow-y-auto pr-1">
-          <!-- Populated dynamically -->
-          <p class="text-xs text-slate-400 italic">Loading ticker...</p>
-        </div>
-      </div>
-
-      <!-- Sidebar Section 2: Heavy Drops > ₹999 -->
-      <div class="mb-6">
-        <div class="flex items-center justify-between mb-3">
-          <h3 class="text-xs font-bold uppercase tracking-wider text-slate-500 flex items-center gap-1.5">
-            <span>🔥</span> Heavy Drops (> ₹999)
-          </h3>
-          <span id="heavyCountBadge" class="text-[10px] bg-amber-50 text-amber-700 font-bold px-2 py-0.5 rounded border border-amber-200">0</span>
-        </div>
-        <div id="heavyDropsList" class="space-y-2.5 max-h-[320px] overflow-y-auto pr-1">
-          <!-- Populated dynamically -->
-          <p class="text-xs text-slate-400 italic">Scanning heavy drops...</p>
-        </div>
-      </div>
-
-      <!-- Quick Navigation / Stats Box -->
-      <div class="bg-slate-900 text-slate-200 p-4 rounded-xl text-xs space-y-2 shadow-inner">
-        <div class="font-bold text-amber-400 flex items-center gap-1"><span>🛡️</span> Verified Catalog Note</div>
-        <p class="text-slate-300 leading-relaxed text-[11px]">All items are synchronized directly from Amazon Vine storage pipelines. Prices reflect live available data.</p>
-        <button onclick="openTermsModal()" class="w-full mt-2 bg-slate-800 hover:bg-slate-700 text-slate-200 py-1.5 rounded-lg font-medium text-center transition block lg:hidden">
-          View Terms & Conditions
-        </button>
-      </div>
-    </aside>
-
-    <!-- Overlay for mobile sidebar -->
-    <div id="sidebarOverlay" onclick="toggleMobileSidebar()" class="fixed inset-0 bg-slate-900/50 z-40 hidden lg:hidden backdrop-blur-sm"></div>
-
-    <!-- MAIN CATALOG AREA -->
-    <main class="lg:col-span-3 xl:col-span-4 flex flex-col gap-6">
-
-      <div class="bg-white p-4 rounded-2xl shadow-sm border border-slate-200 flex flex-col md:flex-row items-center justify-between gap-4">
-        
-        <!-- Search Input -->
-        <div class="relative w-full md:w-80">
-          <span class="absolute inset-y-0 left-0 pl-3.5 flex items-center pointer-events-none text-slate-400">
-            <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z"></path></svg>
-          </span>
-          <input type="text" id="searchInput" oninput="handleFilter()" placeholder="Search products by title..." class="w-full pl-10 pr-4 py-2 bg-slate-50 border border-slate-200 rounded-xl text-xs sm:text-sm focus:outline-none focus:ring-2 focus:ring-amber-500/50 focus:border-amber-500 transition">
-        </div>
-
-        <!-- Filter and Sort Dropdowns -->
-        <div class="flex flex-wrap items-center gap-3 w-full md:w-auto justify-end">
-          
-          <!-- Price Filter -->
-          <div class="flex items-center gap-2">
-            <label for="priceFilter" class="text-xs font-semibold text-slate-500 hidden sm:inline">Price:</label>
-            <select id="priceFilter" onchange="handleFilter()" class="bg-slate-50 border border-slate-200 text-slate-700 text-xs sm:text-sm rounded-xl px-3 py-2 focus:outline-none focus:ring-2 focus:ring-amber-500/50">
-              <option value="all">All Prices</option>
-              <option value="free">Free / Zero</option>
-              <option value="under500">Under ₹500</option>
-              <option value="500to999">₹500 - ₹999</option>
-              <option value="above999">Above ₹999</option>
-            </select>
-          </div>
-
-          <!-- Sort Option -->
-          <div class="flex items-center gap-2">
-            <label for="sortOption" class="text-xs font-semibold text-slate-500 hidden sm:inline">Sort:</label>
-            <select id="sortOption" onchange="handleFilter()" class="bg-slate-50 border border-slate-200 text-slate-700 text-xs sm:text-sm rounded-xl px-3 py-2 focus:outline-none focus:ring-2 focus:ring-amber-500/50">
-              <option value="newest">✨ Newest First</option>
-              <option value="priceLow">💲 Price: Low to High</option>
-              <option value="priceHigh">💎 Price: High to Low</option>
-            </select>
-          </div>
-
-          <!-- Results count badge -->
-          <div class="text-xs text-slate-500 font-medium px-2 py-1 bg-slate-100 rounded-lg">
-            Showing <span id="filteredCount" class="font-bold text-slate-800">0</span> items
-          </div>
-        </div>
-      </div>
-
-      <div id="productGrid" class="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 xl:grid-cols-4 2xl:grid-cols-5 gap-4">
-        <!-- Products will be injected here dynamically -->
-        <div class="col-span-full py-16 text-center">
-          <div class="inline-block w-8 h-8 border-4 border-amber-500 border-t-transparent rounded-full animate-spin mb-3"></div>
-          <p class="text-sm font-medium text-slate-500">Loading catalog items...</p>
-        </div>
-      </div>
-
-    </main>
+  <!-- Top Announcement Bar -->
+  <div class="bg-gradient-to-r from-amber-500 to-orange-600 text-white text-xs py-1.5 px-4 text-center font-medium shadow-sm">
+    ✨ Amazon Vine Exclusive Deals & Live Catalog | Presented by <strong>Gunaho ka Devta</strong> 🚀
   </div>
 
-  <footer class="bg-white border-t border-slate-200 mt-auto py-8 text-center text-xs text-slate-500">
-    <div class="max-w-[1920px] mx-auto px-4 sm:px-6 lg:px-8 space-y-3">
-      <div class="flex items-center justify-center gap-4">
-        <button onclick="openTermsModal()" class="hover:text-slate-800 font-medium underline">Terms & Conditions</button>
-        <span>•</span>
-        <span class="text-amber-600 font-semibold">Amazon Vine Explore List</span>
-        <span>•</span>
-        <span>Presented by Gunaho ka Devta</span>
+  <div class="max-w-[1920px] mx-auto p-4 sm:p-6">
+    
+    <!-- Header Section -->
+    <header class="flex flex-col md:flex-row justify-between items-start md:items-center mb-6 bg-white p-5 rounded-2xl shadow-sm border border-slate-200 gap-4">
+      <div>
+        <div class="flex items-center gap-2">
+          <h1 class="text-2xl font-black text-slate-900 tracking-tight">Amazon Vine Explore List</h1>
+          <span class="bg-amber-100 text-amber-800 text-[10px] font-bold px-2 py-0.5 rounded-full uppercase border border-amber-200">Live Catalog</span>
+        </div>
+        <p class="text-xs text-slate-500 mt-0.5">Presented by <span class="font-semibold text-slate-700">Gunaho ka Devta</span> • Auto-synced with GitHub Data Store</p>
       </div>
-      <p>© 2026 Amazon Vine Tracker. Automated GitHub data synchronization engine.</p>
+      
+      <div class="flex flex-wrap items-center gap-3 w-full md:w-auto">
+        <!-- Search Input -->
+        <div class="relative flex-1 md:w-64">
+          <span class="absolute inset-y-0 left-0 flex items-center pl-3 pointer-events-none text-slate-400">
+            <i class="fa-solid fa-search text-xs"></i>
+          </span>
+          <input type="text" id="searchInput" oninput="filterProducts()" placeholder="Search products..." class="w-full pl-9 pr-4 py-2 bg-slate-100 border border-slate-200 rounded-xl text-xs focus:outline-none focus:ring-2 focus:ring-amber-500/50 transition">
+        </div>
+
+        <button onclick="loadProducts()" class="bg-slate-900 hover:bg-slate-800 text-white px-4 py-2 rounded-xl text-xs font-semibold transition flex items-center gap-2 shadow-sm cursor-pointer">
+          <i class="fa-solid fa-rotate"></i> Refresh Catalog
+        </button>
+      </div>
+    </header>
+
+    <!-- Main Layout: Sidebar + Grid -->
+    <div class="grid grid-cols-1 lg:grid-cols-4 gap-6">
+      
+      <!-- Left Sidebar (Filters, Ticker & Heavy Drops) -->
+      <aside class="space-y-6">
+        
+        <!-- Filter Box -->
+        <div class="bg-white p-5 rounded-2xl shadow-sm border border-slate-200 space-y-4">
+          <h2 class="text-sm font-bold text-slate-900 flex items-center gap-2 border-b border-slate-100 pb-3">
+            <i class="fa-solid fa-filter text-amber-500"></i> Filters & Sort
+          </h2>
+          
+          <!-- Price Filter -->
+          <div>
+            <label class="block text-xs font-semibold text-slate-600 mb-1.5">Price Range</label>
+            <select id="priceFilter" onchange="filterProducts()" class="w-full bg-slate-100 border border-slate-200 rounded-xl px-3 py-2 text-xs focus:outline-none focus:ring-2 focus:ring-amber-500/50">
+              <option value="all">All Prices</option>
+              <option value="under500">Under ₹500</option>
+              <option value="500to999">₹500 - ₹999</option>
+              <option value="above999">Heavy Drops (> ₹999)</option>
+            </select>
+          </div>
+
+          <!-- Sort Filter -->
+          <div>
+            <label class="block text-xs font-semibold text-slate-600 mb-1.5">Sort By</label>
+            <select id="sortFilter" onchange="filterProducts()" class="w-full bg-slate-100 border border-slate-200 rounded-xl px-3 py-2 text-xs focus:outline-none focus:ring-2 focus:ring-amber-500/50">
+              <option value="newest">Newest First (Latest Drops)</option>
+              <option value="price-low">Price: Low to High</option>
+              <option value="price-high">Price: High to Low</option>
+            </select>
+          </div>
+        </div>
+
+        <!-- Latest 10 Items Sidebar Ticker -->
+        <div class="bg-white p-5 rounded-2xl shadow-sm border border-slate-200">
+          <h3 class="text-sm font-bold text-slate-900 flex items-center gap-2 border-b border-slate-100 pb-3 mb-3">
+            <i class="fa-solid fa-bolt text-amber-500"></i> Latest 10 Drops Ticker
+          </h3>
+          <div id="latestTicker" class="space-y-3 max-h-[350px] overflow-y-auto pr-1">
+            <!-- Dynamically populated -->
+          </div>
+        </div>
+
+        <!-- Heavy Drops (> ₹999) Highlights -->
+        <div class="bg-gradient-to-br from-amber-500 to-orange-600 text-white p-5 rounded-2xl shadow-sm">
+          <h3 class="text-sm font-bold flex items-center gap-2 border-b border-white/20 pb-3 mb-3">
+            <i class="fa-solid fa-fire text-yellow-200"></i> Heavy Drops (> ₹999)
+          </h3>
+          <div id="heavyDropsBox" class="space-y-2 text-xs">
+            <!-- Dynamically populated -->
+          </div>
+        </div>
+
+      </aside>
+
+      <!-- Right Product Grid Section -->
+      <main class="lg:col-span-3">
+        
+        <!-- Active Filter status -->
+        <div class="flex justify-between items-center mb-4 px-1">
+          <p id="resultCount" class="text-xs font-medium text-slate-500">Showing all items</p>
+        </div>
+
+        <!-- Product Grid (Responsive columns up to 4/5 on large screens) -->
+        <div id="productGrid" class="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 xl:grid-cols-4 gap-4">
+          <p class="col-span-full text-center text-slate-400 py-16 text-sm">Products load ho rahe hain...</p>
+        </div>
+
+      </main>
     </div>
-  </footer>
+
+    <!-- Footer & Terms -->
+    <footer class="mt-12 border-t border-slate-200 pt-6 pb-10 text-center text-xs text-slate-500 space-y-3">
+      <p>© 2026 Amazon Vine Explore List. Presented with ❤️ by <span class="font-semibold text-slate-700">Gunaho ka Devta</span>.</p>
+      <div class="flex justify-center gap-4">
+        <button onclick="openTerms()" class="hover:text-slate-800 underline transition">Terms & Conditions</button>
+        <span>•</span>
+        <span class="text-slate-400">Auto-sync active via GitHub JSON Store</span>
+      </div>
+    </footer>
+
+  </div>
 
   <!-- Terms & Conditions Modal -->
-  <div id="termsModal" class="fixed inset-0 bg-slate-950/60 z-50 flex items-center justify-center p-4 hidden backdrop-blur-xs">
-    <div class="bg-white rounded-3xl max-w-lg w-full p-6 shadow-2xl border border-slate-100 transform transition-all">
-      <div class="flex items-center justify-between mb-4 pb-3 border-b border-slate-100">
-        <h3 class="text-lg font-bold text-slate-900 flex items-center gap-2"><span>📜</span> Terms & Conditions</h3>
-        <button onclick="closeTermsModal()" class="text-slate-400 hover:text-slate-700 p-1.5 rounded-lg bg-slate-50 hover:bg-slate-100 transition">
-          <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"></path></svg>
-        </button>
+  <div id="termsModal" class="fixed inset-0 bg-slate-900/50 backdrop-blur-sm hidden items-center justify-center p-4 z-50">
+    <div class="bg-white max-w-lg w-full p-6 rounded-2xl shadow-xl space-y-4">
+      <div class="flex justify-between items-center border-b border-slate-100 pb-3">
+        <h3 class="font-bold text-slate-900 text-base">Terms & Conditions</h3>
+        <button onclick="closeTerms()" class="text-slate-400 hover:text-slate-600 text-sm"><i class="fa-solid fa-xmark"></i></button>
       </div>
-      <div class="space-y-3 text-xs sm:text-sm text-slate-600 leading-relaxed max-h-[60vh] overflow-y-auto pr-2">
-        <p><strong>1. Informational Purpose:</strong> This catalog aggregates publicly or semi-publicly available Amazon Vine deals and products via automated synchronization for quick exploration and review tracking.</p>
-        <p><strong>2. Pricing & Availability:</strong> Prices, discounts, and availability are subject to change instantly on Amazon. We do not guarantee stock or exact pricing accuracy.</p>
-        <p><strong>3. Affiliate & External Links:</strong> Clicking "Buy / View Now" redirects you to the respective product page. Ensure you review all seller terms on Amazon before making any decisions.</p>
-        <p><strong>4. Presented by Gunaho ka Devta:</strong> This interface is independently hosted and curated as a personal dashboard utility.</p>
+      <div class="text-xs text-slate-600 space-y-2 max-h-[60vh] overflow-y-auto">
+        <p>1. This catalog compiles Amazon Vine product details automatically synced from repository storage.</p>
+        <p>2. Prices, availability, and item listings are subject to change directly on Amazon as per individual program eligibility rules.</p>
+        <p>3. This independent exploratory portal is managed and presented by <strong>Gunaho ka Devta</strong> for informational and review tracking purposes.</p>
       </div>
-      <div class="mt-6 pt-4 border-t border-slate-100 flex justify-end">
-        <button onclick="closeTermsModal()" class="bg-slate-900 hover:bg-slate-800 text-white px-5 py-2.5 rounded-xl text-xs font-bold transition">
-          I Understand
-        </button>
+      <div class="text-right pt-2">
+        <button onclick="closeTerms()" class="bg-slate-900 text-white px-4 py-2 rounded-xl text-xs font-semibold">Close</button>
       </div>
     </div>
   </div>
 
   <script>
     const FILE_PATH = 'data.json';
-    let rawProducts = [];
+    let allProducts = [];
     let filteredProducts = [];
 
-    // Toggle Mobile Sidebar
-    function toggleMobileSidebar() {
-      const sidebar = document.getElementById('sidebar');
-      const overlay = document.getElementById('sidebarOverlay');
-      sidebar.classList.toggle('-translate-x-full');
-      overlay.classList.toggle('hidden');
-    }
-
-    // Modal Controls
-    function openTermsModal() {
-      document.getElementById('termsModal').classList.remove('hidden');
-    }
-    function closeTermsModal() {
-      document.getElementById('termsModal').classList.add('hidden');
-    }
-
-    // Load Products Data Function with Fallback
     async function loadProducts() {
       const grid = document.getElementById('productGrid');
-      grid.innerHTML = `
-        <div class="col-span-full py-16 text-center">
-          <div class="inline-block w-8 h-8 border-4 border-amber-500 border-t-transparent rounded-full animate-spin mb-3"></div>
-          <p class="text-sm font-medium text-slate-500">Refreshing catalog from GitHub data store...</p>
-        </div>
-      `;
+      grid.innerHTML = `<p class="col-span-full text-center text-slate-400 py-16 text-sm">Refreshing catalog...</p>`;
 
       try {
         const response = await fetch(`./${FILE_PATH}?t=${Date.now()}`);
-        if (!response.ok) throw new Error("Failed to load data.json");
-        rawProducts = await response.json();
+        if (!response.ok) throw new Error("Data fail");
+        allProducts = await response.json();
+        
+        // Agar data.json khali ya galat format me ho toh dummy sample (jaisa aapne bataya) add kar dein taaki layout check ho sake
+        if(!allProducts || allProducts.length === 0) {
+          allProducts = [
+            {
+              title: "Flavizo Pink Heart Cat Collar with Bell, Adjustable Safety Buckle Soft Neck Belt for Kittens and Cats, Comfortable Pet Accessory Stylish Kitten Belts",
+              price: "279",
+              mrp: "499",
+              image: "https://m.media-amazon.com/images/I/61m1V2bWfRL._AC_SL1500_.jpg",
+              url: "https://amazon.in",
+              firstSeenAt: "2026-06-26"
+            }
+          ];
+        }
+
+        filterProducts();
       } catch (err) {
-        console.warn("Could not fetch data.json, loading robust sample mock data for preview:", err);
-        // Fallback mock data so preview works instantly and gorgeously out of the box
-        rawProducts = [
-          { title: "Wireless Noise Cancelling Headphones with Deep Bass", image: "https://images.unsplash.com/photo-1505740420928-5e560c06d30e?w=500&auto=format&fit=crop&q=60", price: "1299", mrp: "2999", firstSeenAt: "2 hrs ago", url: "https://amazon.in" },
-          { title: "Smart Fitness Watch with Heart Rate & SpO2 Monitor", image: "https://images.unsplash.com/photo-1523275335684-37898b6baf30?w=500&auto=format&fit=crop&q=60", price: "0", mrp: "1499", firstSeenAt: "4 hrs ago", url: "https://amazon.in" },
-          { title: "Ergonomic Mechanical Gaming Keyboard RGB Backlit", image: "https://images.unsplash.com/photo-1587829741301-dc798b83add3?w=500&auto=format&fit=crop&q=60", price: "849", mrp: "1899", firstSeenAt: "1 day ago", url: "https://amazon.in" },
-          { title: "Ultra HD 4K Action Camera Waterproof Sports Cam", image: "https://images.unsplash.com/photo-1526170375885-4d8ecf77b99f?w=500&auto=format&fit=crop&q=60", price: "2499", mrp: "4999", firstSeenAt: "Just now", url: "https://amazon.in" },
-          { title: "Stainless Steel Insulated Coffee Travel Mug 500ml", image: "https://images.unsplash.com/photo-1514228742587-6b1558fcca3d?w=500&auto=format&fit=crop&q=60", price: "0", mrp: "799", firstSeenAt: "5 hrs ago", url: "https://amazon.in" },
-          { title: "Portable Bluetooth Speaker Waterproof with Rich Sound", image: "https://images.unsplash.com/photo-1608043152269-423dbba4e7e1?w=500&auto=format&fit=crop&q=60", price: "699", mrp: "1599", firstSeenAt: "2 days ago", url: "https://amazon.in" },
-          { title: "LED Desk Lamp with Wireless Phone Charging Base", image: "https://images.unsplash.com/photo-1534447677768-be436bb09401?w=500&auto=format&fit=crop&q=60", price: "1150", mrp: "2200", firstSeenAt: "3 hrs ago", url: "https://amazon.in" },
-          { title: "Professional Chef Knife Set with Wooden Block", image: "https://images.unsplash.com/photo-1593618998160-e34014e67546?w=500&auto=format&fit=crop&q=60", price: "0", mrp: "1999", firstSeenAt: "6 hrs ago", url: "https://amazon.in" }
+        // Fallback demo item agar data.json load na ho paaye
+        allProducts = [
+          {
+            title: "Flavizo Pink Heart Cat Collar with Bell, Adjustable Safety Buckle Soft Neck Belt for Kittens and Cats, Comfortable Pet Accessory Stylish Kitten Belts",
+            price: "279",
+            mrp: "499",
+            image: "https://m.media-amazon.com/images/I/61m1V2bWfRL._AC_SL1500_.jpg",
+            url: "https://amazon.in",
+            firstSeenAt: "2026-06-26"
+          }
         ];
-      }
-
-      // Update Header Stats
-      document.getElementById('statTotal').innerText = rawProducts.length;
-      const heavyCount = rawProducts.filter(p => {
-        const pNum = parseFloat(String(p.price || '0').replace(/[^0-9.]/g, ''));
-        return pNum > 999;
-      }).length;
-      document.getElementById('statHeavy').innerText = heavyCount;
-      document.getElementById('heavyCountBadge').innerText = heavyCount;
-
-      renderSidebarWidgets();
-      handleFilter();
-    }
-
-    // Render Sidebar Ticker & Heavy Drops
-    function renderSidebarWidgets() {
-      // Sort newest for ticker
-      const sortedNewest = [...rawProducts].sort((a, b) => {
-        const timeA = new Date(a.createdAt || a.firstSeenAt || 0).getTime();
-        const timeB = new Date(b.createdAt || b.firstSeenAt || 0).getTime();
-        return timeB - timeA;
-      });
-
-      const latest10 = sortedNewest.slice(0, 10);
-      const tickerContainer = document.getElementById('latestTicker');
-      
-      if (latest10.length === 0) {
-        tickerContainer.innerHTML = `<p class="text-xs text-slate-400">No recent items found.</p>`;
-      } else {
-        tickerContainer.innerHTML = latest10.map(p => {
-          const title = p.title || 'Amazon Vine Product';
-          const img = p.image || 'https://placehold.co/100x100/f1f5f9/475569?text=Vine';
-          const priceVal = parsePriceValue(p);
-          const priceDisplay = priceVal === 0 ? '<span class="text-emerald-600 font-bold">Free</span>' : `<span class="text-slate-900 font-bold">₹${priceVal}</span>`;
-          
-          return `
-            <a href="${p.url || '#'}" target="_blank" class="flex items-center gap-3 p-2 rounded-xl hover:bg-slate-50 border border-slate-100 transition group">
-              <img src="${img}" alt="" class="w-10 h-10 object-contain rounded-lg bg-slate-50 p-1 flex-shrink-0" onerror="this.src='https://placehold.co/100x100/f1f5f9/475569?text=Vine'">
-              <div class="min-w-0 flex-1">
-                <h4 class="text-xs font-medium text-slate-800 truncate group-hover:text-amber-600 transition">${title}</h4>
-                <div class="flex items-center justify-between mt-0.5">
-                  <span class="text-[11px]">${priceDisplay}</span>
-                  <span class="text-[10px] text-slate-400">${p.firstSeenAt || 'New'}</span>
-                </div>
-              </div>
-            </a>
-          `;
-        }).join('');
-      }
-
-      // Heavy Drops (> ₹999)
-      const heavyDrops = rawProducts.filter(p => parsePriceValue(p) > 999);
-      const heavyContainer = document.getElementById('heavyDropsList');
-
-      if (heavyDrops.length === 0) {
-        heavyContainer.innerHTML = `<p class="text-xs text-slate-400">No heavy drops above ₹999 right now.</p>`;
-      } else {
-        heavyContainer.innerHTML = heavyDrops.slice(0, 8).map(p => {
-          const title = p.title || 'Amazon Vine Product';
-          const img = p.image || 'https://placehold.co/100x100/f1f5f9/475569?text=Vine';
-          const priceVal = parsePriceValue(p);
-
-          return `
-            <a href="${p.url || '#'}" target="_blank" class="flex items-center gap-3 p-2 rounded-xl hover:bg-amber-50/50 border border-amber-100/60 transition group bg-amber-50/20">
-              <img src="${img}" alt="" class="w-10 h-10 object-contain rounded-lg bg-white p-1 flex-shrink-0" onerror="this.src='https://placehold.co/100x100/f1f5f9/475569?text=Vine'">
-              <div class="min-w-0 flex-1">
-                <h4 class="text-xs font-medium text-slate-800 truncate group-hover:text-amber-700 transition">${title}</h4>
-                <div class="flex items-center justify-between mt-0.5">
-                  <span class="text-[11px] font-bold text-amber-700">₹${priceVal}</span>
-                  <span class="text-[10px] text-slate-400">${p.firstSeenAt || 'Drop'}</span>
-                </div>
-              </div>
-            </a>
-          `;
-        }).join('');
+        filterProducts();
       }
     }
 
-    // Helper to extract clean numeric price
-    function parsePriceValue(p) {
-      if (!p.price || p.price === "0" || p.price === 0) return 0;
-      const cleaned = String(p.price).replace(/[^0-9.]/g, '');
-      return parseFloat(cleaned) || 0;
-    }
-
-    // Filter and Sort Engine
-    function handleFilter() {
-      const searchTerm = document.getElementById('searchInput').value.toLowerCase().trim();
+    function filterProducts() {
+      const searchQuery = document.getElementById('searchInput').value.toLowerCase();
       const priceFilter = document.getElementById('priceFilter').value;
-      const sortOption = document.getElementById('sortOption').value;
+      const sortFilter = document.getElementById('sortFilter').value;
 
-      // 1. Filter by Search Text
-      filteredProducts = rawProducts.filter(p => {
+      // 1. Filter by Search Query
+      filteredProducts = allProducts.filter(p => {
         const title = (p.title || '').toLowerCase();
-        return title.includes(searchTerm);
+        return title.includes(searchQuery);
       });
 
-      // 2. Filter by Price Category
+      // 2. Filter by Price Range
       filteredProducts = filteredProducts.filter(p => {
-        const priceVal = parsePriceValue(p);
-        if (priceFilter === 'free') return priceVal === 0;
-        if (priceFilter === 'under500') return priceVal > 0 && priceVal < 500;
-        if (priceFilter === '500to999') return priceVal >= 500 && priceVal <= 999;
-        if (priceFilter === 'above999') return priceVal > 999;
-        return true; // 'all'
+        const pVal = parseFloat(p.price) || 0;
+        if (priceFilter === 'under500') return pVal > 0 && pVal < 500;
+        if (priceFilter === '500to999') return pVal >= 500 && pVal <= 999;
+        if (priceFilter === 'above999') return pVal > 999;
+        return true;
       });
 
       // 3. Sort Products
       filteredProducts.sort((a, b) => {
-        const priceA = parsePriceValue(a);
-        const priceB = parsePriceValue(b);
         const timeA = new Date(a.createdAt || a.firstSeenAt || 0).getTime();
         const timeB = new Date(b.createdAt || b.firstSeenAt || 0).getTime();
+        const priceA = parseFloat(a.price) || 0;
+        const priceB = parseFloat(b.price) || 0;
 
-        if (sortOption === 'newest') {
-          return timeB - timeA;
-        } else if (sortOption === 'priceLow') {
-          return priceA - priceB;
-        } else if (sortOption === 'priceHigh') {
-          return priceB - priceA;
-        }
+        if (sortFilter === 'newest') return timeB - timeA;
+        if (sortFilter === 'price-low') return priceA - priceB;
+        if (sortFilter === 'price-high') return priceB - priceA;
         return 0;
       });
 
-      document.getElementById('filteredCount').innerText = filteredProducts.length;
       renderGrid();
+      renderSidebarWidgets();
     }
 
-    // Render Main Product Grid Cards (With real price formatting - no line-through on real price)
     function renderGrid() {
       const grid = document.getElementById('productGrid');
+      const countEl = document.getElementById('resultCount');
       
+      countEl.innerText = `Showing ${filteredProducts.length} items`;
+
       if (!filteredProducts || filteredProducts.length === 0) {
-        grid.innerHTML = `
-          <div class="col-span-full py-16 text-center bg-white rounded-2xl border border-slate-200">
-            <p class="text-base font-bold text-slate-700 mb-1">Koi product nahi mila</p>
-            <p class="text-xs text-slate-400">Apne search query ya price filter ko badal kar try karein.</p>
-          </div>
-        `;
+        grid.innerHTML = `<p class="col-span-full text-center text-slate-400 py-16 text-sm bg-white rounded-2xl border border-slate-200">Koi matching product nahi mila.</p>`;
         return;
       }
 
       grid.innerHTML = filteredProducts.map(p => {
         const title = p.title || 'Amazon Vine Product';
-        const img = p.image || 'https://placehold.co/300x300/f1f5f9/475569?text=Product+Image';
-        const priceVal = parsePriceValue(p);
+        const img = p.image || 'https://via.placeholder.com/200';
         
-        // Price formatting rule: No cutting real price. Replace "Free (Vine)" with clean actual price.
-        let priceDisplayHTML = '';
-        if (priceVal === 0) {
-          priceDisplayHTML = `<span class="text-base font-extrabold text-emerald-600">Free (Vine)</span>`;
-        } else {
-          priceDisplayHTML = `<span class="text-base font-extrabold text-slate-900">₹${priceVal.toLocaleString('en-IN')}</span>`;
+        // Price logic fix: Free Vine ki jagah direct price dikhana hai
+        let displayPrice = 'Price not listed';
+        if (p.price && p.price !== "0" && p.price !== "") {
+          displayPrice = `₹${p.price}`;
         }
-
-        // MRP display if present and higher
-        let mrpDisplayHTML = '';
-        if (p.mrp && p.mrp !== "0" && p.mrp !== 0) {
-          const mrpVal = parseFloat(String(p.mrp).replace(/[^0-9.]/g, '')) || 0;
-          if (mrpVal > priceVal) {
-            mrpDisplayHTML = `<span class="text-xs text-slate-400 line-through">₹${mrpVal.toLocaleString('en-IN')}</span>`;
-          }
-        }
-
+        
+        const mrp = p.mrp && p.mrp !== "0" && p.mrp !== p.price ? `₹${p.mrp}` : null;
         const timeBadge = p.firstSeenAt || '';
 
         return `
-          <div class="bg-white rounded-2xl shadow-sm hover:shadow-xl border border-slate-200 overflow-hidden flex flex-col justify-between transition-all duration-300 group">
-            
-            <!-- Card Top Media & Badges -->
-            <div class="relative">
-              ${timeBadge ? `<span class="absolute top-2.5 right-2.5 z-10 bg-slate-900/80 backdrop-blur-md text-amber-300 border border-amber-500/30 text-[10px] font-bold px-2 py-0.5 rounded-lg shadow-sm">${timeBadge}</span>` : ''}
-              
-              <div class="h-48 bg-slate-50 p-4 flex items-center justify-center relative overflow-hidden">
-                <img src="${img}" alt="${title}" class="max-h-full max-w-full object-contain group-hover:scale-105 transition duration-500" onerror="this.src='https://placehold.co/300x300/f1f5f9/475569?text=Vine+Item'">
+          <div class="bg-white rounded-2xl shadow-sm hover:shadow-md border border-slate-200 overflow-hidden flex flex-col justify-between transition group relative">
+            ${timeBadge ? `<span class="absolute top-2.5 right-2.5 bg-emerald-600 text-white text-[9px] font-bold px-2 py-0.5 rounded-full shadow-sm z-10">${timeBadge}</span>` : ''}
+            <div>
+              <div class="h-44 bg-slate-50 p-4 flex items-center justify-center overflow-hidden">
+                <img src="${img}" alt="${title}" class="max-h-full max-w-full object-contain group-hover:scale-105 transition duration-300">
               </div>
-            </div>
-
-            <!-- Card Body Content -->
-            <div class="p-4 flex-1 flex flex-col justify-between">
-              <div>
-                <h3 class="text-xs font-semibold text-slate-800 line-clamp-2 mb-3 group-hover:text-amber-600 transition leading-relaxed" title="${title}">${title}</h3>
-                
-                <div class="flex items-baseline gap-2 mb-3">
-                  ${priceDisplayHTML}
-                  ${mrpDisplayHTML}
+              <div class="p-3.5">
+                <h3 class="text-xs font-semibold text-slate-800 line-clamp-2 mb-2 leading-relaxed" title="${title}">${title}</h3>
+                <div class="flex items-baseline gap-2 mb-1">
+                  <span class="text-base font-black text-slate-900">${displayPrice}</span>
+                  ${mrp ? `<span class="text-[11px] text-slate-400 line-through">${mrp}</span>` : ''}
                 </div>
               </div>
-
-              <!-- Action Button -->
-              <div class="pt-2 border-t border-slate-100">
-                <a href="${p.url || '#'}" target="_blank" class="block text-center bg-amber-400 hover:bg-amber-500 text-slate-950 text-xs font-bold py-2.5 px-3 rounded-xl transition shadow-sm hover:shadow">
-                  Buy / View Now ↗
-                </a>
-              </div>
             </div>
-
+            <div class="p-3.5 pt-0">
+              <a href="${p.url || '#'}" target="_blank" class="block text-center bg-amber-400 hover:bg-amber-500 text-slate-900 text-xs font-bold py-2.5 px-3 rounded-xl transition shadow-sm">
+                Buy / View Now <i class="fa-solid fa-arrow-up-right-from-square text-[10px] ml-1"></i>
+              </a>
+            </div>
           </div>
         `;
       }).join('');
     }
 
-    // Initial load on window startup
-    window.onload = function() {
-      loadProducts();
-    };
+    function renderSidebarWidgets() {
+      // Latest 10 Ticker
+      const ticker = document.getElementById('latestTicker');
+      const sortedByNew = [...allProducts].sort((a, b) => {
+        return new Date(b.firstSeenAt || 0) - new Date(a.firstSeenAt || 0);
+      }).slice(0, 10);
+
+      if(sortedByNew.length === 0) {
+        ticker.innerHTML = `<p class="text-xs text-slate-400">No items available</p>`;
+      } else {
+        ticker.innerHTML = sortedByNew.map(p => `
+          <a href="${p.url || '#'}" target="_blank" class="flex items-center gap-2.5 p-2 rounded-xl hover:bg-slate-50 transition border border-transparent hover:border-slate-200 block">
+            <img src="${p.image || 'https://via.placeholder.com/50'}" class="w-10 h-10 object-contain bg-slate-100 rounded-lg p-1 shrink-0">
+            <div class="overflow-hidden">
+              <h4 class="text-[11px] font-semibold text-slate-800 truncate">${p.title || 'Product'}</h4>
+              <p class="text-[10px] text-emerald-600 font-bold">₹${p.price || '0'} <span class="text-slate-400 font-normal">(${p.firstSeenAt || 'New'})</span></p>
+            </div>
+          </a>
+        `).join('');
+      }
+
+      // Heavy Drops (> ₹999)
+      const heavyBox = document.getElementById('heavyDropsBox');
+      const heavyItems = allProducts.filter(p => (parseFloat(p.price) || 0) > 999).slice(0, 5);
+
+      if(heavyItems.length === 0) {
+        heavyBox.innerHTML = `<p class="text-xs text-amber-100 italic">No heavy drops above ₹999 right now.</p>`;
+      } else {
+        heavyBox.innerHTML = heavyItems.map(p => `
+          <a href="${p.url || '#'}" target="_blank" class="bg-white/10 hover:bg-white/20 p-2 rounded-xl transition block border border-white/10">
+            <div class="font-semibold truncate">${p.title || 'Product'}</div>
+            <div class="text-yellow-200 font-bold mt-0.5">₹${p.price}</div>
+          </a>
+        `).join('');
+      }
+    }
+
+    function openTerms() {
+      document.getElementById('termsModal').classList.remove('hidden');
+      document.getElementById('termsModal').classList.add('flex');
+    }
+
+    function closeTerms() {
+      document.getElementById('termsModal').classList.remove('flex');
+      document.getElementById('termsModal').classList.add('hidden');
+    }
+
+    // Initial Load execution
+    loadProducts();
   </script>
 </body>
 </html>
