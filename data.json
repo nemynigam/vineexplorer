@@ -1,314 +1,102 @@
-<!DOCTYPE html>
-<html lang="hi">
-<head>
-  <meta charset="UTF-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>Amazon Vine Explore List - Presented by Gunaho ka Devta</title>
-  <script src="https://cdn.tailwindcss.com"></script>
-  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
-</head>
-<body class="bg-slate-50 min-h-screen font-sans text-slate-800">
-
-  <!-- Top Announcement Bar -->
-  <div class="bg-gradient-to-r from-amber-500 to-orange-600 text-white text-xs py-1.5 px-4 text-center font-medium shadow-sm">
-    ✨ Amazon Vine Exclusive Deals & Live Catalog | Presented by <strong>Gunaho ka Devta</strong> 🚀
-  </div>
-
-  <div class="max-w-[1920px] mx-auto p-4 sm:p-6">
-    
-    <!-- Header Section -->
-    <header class="flex flex-col md:flex-row justify-between items-start md:items-center mb-6 bg-white p-5 rounded-2xl shadow-sm border border-slate-200 gap-4">
-      <div>
-        <div class="flex items-center gap-2">
-          <h1 class="text-2xl font-black text-slate-900 tracking-tight">Amazon Vine Explore List</h1>
-          <span class="bg-amber-100 text-amber-800 text-[10px] font-bold px-2 py-0.5 rounded-full uppercase border border-amber-200">Live Catalog</span>
-        </div>
-        <p class="text-xs text-slate-500 mt-0.5">Presented by <span class="font-semibold text-slate-700">Gunaho ka Devta</span> • Auto-synced with GitHub Data Store</p>
-      </div>
-      
-      <div class="flex flex-wrap items-center gap-3 w-full md:w-auto">
-        <!-- Search Input -->
-        <div class="relative flex-1 md:w-64">
-          <span class="absolute inset-y-0 left-0 flex items-center pl-3 pointer-events-none text-slate-400">
-            <i class="fa-solid fa-search text-xs"></i>
-          </span>
-          <input type="text" id="searchInput" oninput="filterProducts()" placeholder="Search products..." class="w-full pl-9 pr-4 py-2 bg-slate-100 border border-slate-200 rounded-xl text-xs focus:outline-none focus:ring-2 focus:ring-amber-500/50 transition">
-        </div>
-
-        <button onclick="loadProducts()" class="bg-slate-900 hover:bg-slate-800 text-white px-4 py-2 rounded-xl text-xs font-semibold transition flex items-center gap-2 shadow-sm cursor-pointer">
-          <i class="fa-solid fa-rotate"></i> Refresh Catalog
-        </button>
-      </div>
-    </header>
-
-    <!-- Main Layout: Sidebar + Grid -->
-    <div class="grid grid-cols-1 lg:grid-cols-4 gap-6">
-      
-      <!-- Left Sidebar (Filters, Ticker & Heavy Drops) -->
-      <aside class="space-y-6">
-        
-        <!-- Filter Box -->
-        <div class="bg-white p-5 rounded-2xl shadow-sm border border-slate-200 space-y-4">
-          <h2 class="text-sm font-bold text-slate-900 flex items-center gap-2 border-b border-slate-100 pb-3">
-            <i class="fa-solid fa-filter text-amber-500"></i> Filters & Sort
-          </h2>
-          
-          <!-- Price Filter -->
-          <div>
-            <label class="block text-xs font-semibold text-slate-600 mb-1.5">Price Range</label>
-            <select id="priceFilter" onchange="filterProducts()" class="w-full bg-slate-100 border border-slate-200 rounded-xl px-3 py-2 text-xs focus:outline-none focus:ring-2 focus:ring-amber-500/50">
-              <option value="all">All Prices</option>
-              <option value="under500">Under ₹500</option>
-              <option value="500to999">₹500 - ₹999</option>
-              <option value="above999">Heavy Drops (> ₹999)</option>
-            </select>
-          </div>
-
-          <!-- Sort Filter -->
-          <div>
-            <label class="block text-xs font-semibold text-slate-600 mb-1.5">Sort By</label>
-            <select id="sortFilter" onchange="filterProducts()" class="w-full bg-slate-100 border border-slate-200 rounded-xl px-3 py-2 text-xs focus:outline-none focus:ring-2 focus:ring-amber-500/50">
-              <option value="newest">Newest First (Latest Drops)</option>
-              <option value="price-low">Price: Low to High</option>
-              <option value="price-high">Price: High to Low</option>
-            </select>
-          </div>
-        </div>
-
-        <!-- Latest 10 Items Sidebar Ticker -->
-        <div class="bg-white p-5 rounded-2xl shadow-sm border border-slate-200">
-          <h3 class="text-sm font-bold text-slate-900 flex items-center gap-2 border-b border-slate-100 pb-3 mb-3">
-            <i class="fa-solid fa-bolt text-amber-500"></i> Latest 10 Drops Ticker
-          </h3>
-          <div id="latestTicker" class="space-y-3 max-h-[350px] overflow-y-auto pr-1">
-            <!-- Dynamically populated -->
-          </div>
-        </div>
-
-        <!-- Heavy Drops (> ₹999) Highlights -->
-        <div class="bg-gradient-to-br from-amber-500 to-orange-600 text-white p-5 rounded-2xl shadow-sm">
-          <h3 class="text-sm font-bold flex items-center gap-2 border-b border-white/20 pb-3 mb-3">
-            <i class="fa-solid fa-fire text-yellow-200"></i> Heavy Drops (> ₹999)
-          </h3>
-          <div id="heavyDropsBox" class="space-y-2 text-xs">
-            <!-- Dynamically populated -->
-          </div>
-        </div>
-
-      </aside>
-
-      <!-- Right Product Grid Section -->
-      <main class="lg:col-span-3">
-        
-        <!-- Active Filter status -->
-        <div class="flex justify-between items-center mb-4 px-1">
-          <p id="resultCount" class="text-xs font-medium text-slate-500">Showing all items</p>
-        </div>
-
-        <!-- Product Grid -->
-        <div id="productGrid" class="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 xl:grid-cols-4 gap-4">
-          <p class="col-span-full text-center text-slate-400 py-16 text-sm">Products load ho rahe hain...</p>
-        </div>
-
-      </main>
-    </div>
-
-    <!-- Footer & Terms -->
-    <footer class="mt-12 border-t border-slate-200 pt-6 pb-10 text-center text-xs text-slate-500 space-y-3">
-      <p>© 2026 Amazon Vine Explore List. Presented with ❤️ by <span class="font-semibold text-slate-700">Gunaho ka Devta</span>.</p>
-      <div class="flex justify-center gap-4">
-        <button onclick="openTerms()" class="hover:text-slate-800 underline transition">Terms & Conditions</button>
-        <span>•</span>
-        <span class="text-slate-400">Auto-sync active via GitHub JSON Store</span>
-      </div>
-    </footer>
-
-  </div>
-
-  <!-- Terms & Conditions Modal -->
-  <div id="termsModal" class="fixed inset-0 bg-slate-900/50 backdrop-blur-sm hidden items-center justify-center p-4 z-50">
-    <div class="bg-white max-w-lg w-full p-6 rounded-2xl shadow-xl space-y-4">
-      <div class="flex justify-between items-center border-b border-slate-100 pb-3">
-        <h3 class="font-bold text-slate-900 text-base">Terms & Conditions</h3>
-        <button onclick="closeTerms()" class="text-slate-400 hover:text-slate-600 text-sm"><i class="fa-solid fa-xmark"></i></button>
-      </div>
-      <div class="text-xs text-slate-600 space-y-2 max-h-[60vh] overflow-y-auto">
-        <p>1. This catalog compiles Amazon Vine product details automatically synced from repository storage.</p>
-        <p>2. Prices, availability, and item listings are subject to change directly on Amazon as per individual program eligibility rules.</p>
-        <p>3. This independent exploratory portal is managed and presented by <strong>Gunaho ka Devta</strong> for informational and review tracking purposes.</p>
-      </div>
-      <div class="text-right pt-2">
-        <button onclick="closeTerms()" class="bg-slate-900 text-white px-4 py-2 rounded-xl text-xs font-semibold">Close</button>
-      </div>
-    </div>
-  </div>
-
-  <script>
-    const FILE_PATH = 'data.json';
-    let allProducts = [];
-    let filteredProducts = [];
-
-    // Helper function to extract valid price (pehle price, phir mrp, warna 0)
-    function getEffectivePrice(p) {
-      let pr = parseFloat(p.price);
-      let mr = parseFloat(p.mrp);
-      
-      if (!isNaN(pr) && pr > 0) return pr;
-      if (!isNaN(mr) && mr > 0) return mr;
-      return 0;
-    }
-
-    async function loadProducts() {
-      const grid = document.getElementById('productGrid');
-      grid.innerHTML = `<p class="col-span-full text-center text-slate-400 py-16 text-sm">Refreshing catalog...</p>`;
-
-      try {
-        const response = await fetch(`./${FILE_PATH}?t=${Date.now()}`);
-        if (!response.ok) throw new Error("Data fail");
-        allProducts = await response.json();
-        filterProducts();
-      } catch (err) {
-        allProducts = [];
-        filterProducts();
-      }
-    }
-
-    function filterProducts() {
-      const searchQuery = document.getElementById('searchInput').value.toLowerCase();
-      const priceFilter = document.getElementById('priceFilter').value;
-      const sortFilter = document.getElementById('sortFilter').value;
-
-      // 1. Filter by Search Query
-      filteredProducts = allProducts.filter(p => {
-        const title = (p.title || '').toLowerCase();
-        return title.includes(searchQuery);
-      });
-
-      // 2. Filter by Price Range using helper function
-      filteredProducts = filteredProducts.filter(p => {
-        const pVal = getEffectivePrice(p);
-        if (priceFilter === 'under500') return pVal > 0 && pVal < 500;
-        if (priceFilter === '500to999') return pVal >= 500 && pVal <= 999;
-        if (priceFilter === 'above999') return pVal > 999;
-        return true;
-      });
-
-      // 3. Sort Products
-      filteredProducts.sort((a, b) => {
-        const timeA = new Date(a.createdAt || a.firstSeenAt || 0).getTime();
-        const timeB = new Date(b.createdAt || b.firstSeenAt || 0).getTime();
-        const priceA = getEffectivePrice(a);
-        const priceB = getEffectivePrice(b);
-
-        if (sortFilter === 'newest') return timeB - timeA;
-        if (sortFilter === 'price-low') return priceA - priceB;
-        if (sortFilter === 'price-high') return priceB - priceA;
-        return 0;
-      });
-
-      renderGrid();
-      renderSidebarWidgets();
-    }
-
-    function renderGrid() {
-      const grid = document.getElementById('productGrid');
-      const countEl = document.getElementById('resultCount');
-      
-      countEl.innerText = `Showing ${filteredProducts.length} items`;
-
-      if (!filteredProducts || filteredProducts.length === 0) {
-        grid.innerHTML = `<p class="col-span-full text-center text-slate-400 py-16 text-sm bg-white rounded-2xl border border-slate-200">Koi matching product nahi mila.</p>`;
-        return;
-      }
-
-      grid.innerHTML = filteredProducts.map(p => {
-        const title = p.title || 'Amazon Vine Product';
-        const img = p.image || 'https://via.placeholder.com/200';
-        
-        // Non-zero price logic handling
-        const finalPriceNum = getEffectivePrice(p);
-        let displayPrice = finalPriceNum > 0 ? `₹${finalPriceNum}` : 'Price not fetched';
-
-        const timeBadge = p.firstSeenAt ? p.firstSeenAt.split(' ')[0] : '';
-
-        return `
-          <div class="bg-white rounded-2xl shadow-sm hover:shadow-md border border-slate-200 overflow-hidden flex flex-col justify-between transition group relative">
-            ${timeBadge ? `<span class="absolute top-2.5 right-2.5 bg-emerald-600 text-white text-[9px] font-bold px-2 py-0.5 rounded-full shadow-sm z-10">${timeBadge}</span>` : ''}
-            <div>
-              <div class="h-44 bg-slate-50 p-4 flex items-center justify-center overflow-hidden">
-                <img src="${img}" alt="${title}" class="max-h-full max-w-full object-contain group-hover:scale-105 transition duration-300">
-              </div>
-              <div class="p-3.5">
-                <h3 class="text-xs font-semibold text-slate-800 line-clamp-2 mb-2 leading-relaxed" title="${title}">${title}</h3>
-                <div class="flex items-baseline gap-2 mb-1">
-                  <span class="text-base font-black ${finalPriceNum > 0 ? 'text-slate-900' : 'text-slate-400 text-xs italic'}">${displayPrice}</span>
-                </div>
-              </div>
-            </div>
-            <div class="p-3.5 pt-0">
-              <a href="${p.url || '#'}" target="_blank" class="block text-center bg-amber-400 hover:bg-amber-500 text-slate-900 text-xs font-bold py-2.5 px-3 rounded-xl transition shadow-sm">
-                Buy / View Now <i class="fa-solid fa-arrow-up-right-from-square text-[10px] ml-1"></i>
-              </a>
-            </div>
-          </div>
-        `;
-      }).join('');
-    }
-
-    function renderSidebarWidgets() {
-      // Latest 10 Ticker
-      const ticker = document.getElementById('latestTicker');
-      const sortedByNew = [...allProducts].sort((a, b) => {
-        return new Date(b.createdAt || b.firstSeenAt || 0) - new Date(a.createdAt || a.firstSeenAt || 0);
-      }).slice(0, 10);
-
-      if(sortedByNew.length === 0) {
-        ticker.innerHTML = `<p class="text-xs text-slate-400">No items available</p>`;
-      } else {
-        ticker.innerHTML = sortedByNew.map(p => {
-          const prNum = getEffectivePrice(p);
-          const prStr = prNum > 0 ? `₹${prNum}` : 'Price not fetched';
-          const dateStr = p.firstSeenAt ? p.firstSeenAt.split(' ')[0] : 'New';
-          return `
-            <a href="${p.url || '#'}" target="_blank" class="flex items-center gap-2.5 p-2 rounded-xl hover:bg-slate-50 transition border border-transparent hover:border-slate-200 block">
-              <img src="${p.image || 'https://via.placeholder.com/50'}" class="w-10 h-10 object-contain bg-slate-100 rounded-lg p-1 shrink-0">
-              <div class="overflow-hidden">
-                <h4 class="text-[11px] font-semibold text-slate-800 truncate">${p.title || 'Product'}</h4>
-                <p class="text-[10px] text-emerald-600 font-bold">${prStr} <span class="text-slate-400 font-normal">(${dateStr})</span></p>
-              </div>
-            </a>
-          `;
-        }).join('');
-      }
-
-      // Heavy Drops (> ₹999)
-      const heavyBox = document.getElementById('heavyDropsBox');
-      const heavyItems = allProducts.filter(p => getEffectivePrice(p) > 999).slice(0, 5);
-
-      if(heavyItems.length === 0) {
-        heavyBox.innerHTML = `<p class="text-xs text-amber-100 italic">No heavy drops above ₹999 right now.</p>`;
-      } else {
-        heavyBox.innerHTML = heavyItems.map(p => `
-          <a href="${p.url || '#'}" target="_blank" class="bg-white/10 hover:bg-white/20 p-2 rounded-xl transition block border border-white/10">
-            <div class="font-semibold truncate">${p.title || 'Product'}</div>
-            <div class="text-yellow-200 font-bold mt-0.5">₹${getEffectivePrice(p)}</div>
-          </a>
-        `).join('');
-      }
-    }
-
-    function openTerms() {
-      document.getElementById('termsModal').classList.remove('hidden');
-      document.getElementById('termsModal').classList.add('flex');
-    }
-
-    function closeTerms() `
-      document.getElementById('termsModal').classList.remove('flex');
-      document.getElementById('termsModal').classList.add('hidden');
-    }
-
-    // Initial Load execution
-    loadProducts();
-  </script>
-</body>
-</html>
+[
+  {
+    "id": "B09FHT2JL8",
+    "title": "Restnap +Plus (LeeWell) Chewable Sleeping Pills Supplement - 30 Tablets | Anxiety, Calm, Sleep Quality &amp; Mood Regulation, GABA, 5-HTP, L Theanine, Melatonin, Ashwagandha, MagnesiumRestnap +Plus (LeeWell) Chewable Sleeping Pills Suppl…",
+    "image": "https://m.media-amazon.com/images/W/BW_MEDIAX_AVIF_MEASUREMENT_1306696-T1/images/I/41hPU5oPveL._SS210_.jpg",
+    "mrp": "659.00",
+    "price": "0",
+    "url": "https://www.amazon.in/dp/B09FHT2JL8",
+    "firstSeenAt": "21-09-2026 23:56:24.829",
+    "createdAt": "2026-09-21T18:26:24.829Z"
+  },
+  {
+    "id": "B0BGC5BWBP",
+    "title": "Shecrett P by LeeWell Chewable Frequent Urination, Overactive Bladder Control, UTI, Urinary Incontinence Support Supplement | Pumpkin seed, Quercetin, Calcium Glycerophosphate, L-Arginine, D-Mannose, Probiotics - 30 TabletsShecrett P by LeeWell Chewable Frequent Urination, Overactive…",
+    "image": "https://m.media-amazon.com/images/W/BW_MEDIAX_AVIF_MEASUREMENT_1306696-T1/images/I/41qiMkIbDKL._SS210_.jpg",
+    "mrp": "699.00",
+    "price": "0",
+    "url": "https://www.amazon.in/dp/B0BGC5BWBP",
+    "firstSeenAt": "21-09-2026 23:56:24.829",
+    "createdAt": "2026-09-21T18:26:24.829Z"
+  },
+  {
+    "id": "B0BQ76GHLH",
+    "title": "Restnap - Pm (LeeWell) Sleep Support Supplement | melatonin 10mg | Magnesium Bisglycinate, Vitamin D, Vitamin B12, L Theanine, L Tryptophan, Chamomile flower, Passionflower, Valerian root | pre probiotics 30 CapsulesRestnap - Pm (LeeWell) Sleep Support Supplement | melato…",
+    "image": "https://m.media-amazon.com/images/W/BW_MEDIAX_AVIF_MEASUREMENT_1306696-T1/images/I/41c39unkwsL._SS210_.jpg",
+    "mrp": "679.00",
+    "price": "0",
+    "url": "https://www.amazon.in/dp/B0BQ76GHLH",
+    "firstSeenAt": "21-09-2026 23:56:24.829",
+    "createdAt": "2026-09-21T18:26:24.829Z"
+  },
+  {
+    "id": "B0CP9RFX2T",
+    "title": "Shecrett by LeeWell UTI Probiotics Supplement for Women, Cranberry Extract with 5 Probiotic Strains, Lactobacillus Rhamnosus, Casei, Reuteri, Acidophilus &amp; Bacillus Coagulans, Urinary &amp; Feminine Wellness- 30 CapsulesShecrett by LeeWell UTI Probiotics Supplement for Wo…",
+    "image": "https://m.media-amazon.com/images/W/BW_MEDIAX_AVIF_MEASUREMENT_1306696-T1/images/I/41p0CSw1-JL._SS210_.jpg",
+    "mrp": "619.00",
+    "price": "0",
+    "url": "https://www.amazon.in/dp/B0CP9RFX2T",
+    "firstSeenAt": "21-09-2026 23:56:24.829",
+    "createdAt": "2026-09-21T18:26:24.829Z"
+  },
+  {
+    "id": "B0CVQ8BZX5",
+    "title": "AROMATICO Jasmine Diffuser Oil for Long-Lasting - Natural Home Fragrance Oil for Aromatherapy, Meditation &amp; Concentration | Versatile Use in Diffusers, Air Fresheners 30mlAROMATICO Jasmine Diffuser Oil for Long-Lasting - Natural Ho…",
+    "image": "https://m.media-amazon.com/images/W/BW_MEDIAX_AVIF_MEASUREMENT_1306696-T1/images/I/31xTgfxsYIL._SS210_.jpg",
+    "mrp": "199.00",
+    "price": "0",
+    "url": "https://www.amazon.in/dp/B0CVQ8BZX5",
+    "firstSeenAt": "21-09-2026 23:56:24.829",
+    "createdAt": "2026-09-21T18:26:24.829Z"
+  },
+  {
+    "id": "B0CVQBPSG4",
+    "title": "AROMATICO Eucalyptus Diffuser Oil with Natural Aroma for Humidifiers, Homes, Offices &amp; Showrooms, Candle and Soap Making | Fragrance for Aromatherapy | Essential Oil for Diffuser and Aromatherapy - 30 mlAROMATICO Eucalyptus Diffuser Oil with Natural Aroma for Hu…",
+    "image": "https://m.media-amazon.com/images/W/BW_MEDIAX_AVIF_MEASUREMENT_1306696-T1/images/I/31bRv9zKfXL._SS210_.jpg",
+    "mrp": "199.00",
+    "price": "0",
+    "url": "https://www.amazon.in/dp/B0CVQBPSG4",
+    "firstSeenAt": "21-09-2026 23:56:24.829",
+    "createdAt": "2026-09-21T18:26:24.829Z"
+  },
+  {
+    "id": "B0CVQG1TXB",
+    "title": "AROMATICO Lemongrass Diffuser Oil for Long-Lasting | Home Fragrance &amp; Aromatherapy, Meditation &amp; Concentration | For Diffusers, Air Fresheners | 30mlAROMATICO Lemongrass Diffuser Oil for Long-Lasting |…",
+    "image": "https://m.media-amazon.com/images/W/BW_MEDIAX_AVIF_MEASUREMENT_1306696-T1/images/I/31WwxfLbofL._SS210_.jpg",
+    "mrp": "199.00",
+    "price": "0",
+    "url": "https://www.amazon.in/dp/B0CVQG1TXB",
+    "firstSeenAt": "21-09-2026 23:56:24.829",
+    "createdAt": "2026-09-21T18:26:24.829Z"
+  },
+  {
+    "id": "B0D4QRSWSY",
+    "title": "AROMATICO Lemongrass Cinnamon Warm Massage Oil - Ideal for Hot Oil Massage | Body Massage Oil with Almond &amp; Jojoba for Full Body Relaxation | 300mlAROMATICO Lemongrass Cinnamon Warm Massage Oil -…",
+    "image": "https://m.media-amazon.com/images/W/BW_MEDIAX_AVIF_MEASUREMENT_1306696-T1/images/I/4113cG9bNoL._SS210_.jpg",
+    "mrp": "299.00",
+    "price": "0",
+    "url": "https://www.amazon.in/dp/B0D4QRSWSY",
+    "firstSeenAt": "21-09-2026 23:56:24.829",
+    "createdAt": "2026-09-21T18:26:24.829Z"
+  },
+  {
+    "id": "B0D4QSWG2C",
+    "title": "AROMATICO Almond Massage Oil for Men &amp; Women - Full Body Massage Oil with Jojoba &amp; Sesame for Nourishment | Oil Massage for Body Women | 300mlAROMATICO Almond Massage Oil for Men &amp; Women - F…",
+    "image": "https://m.media-amazon.com/images/W/BW_MEDIAX_AVIF_MEASUREMENT_1306696-T1/images/I/41NON8H4ocL._SS210_.jpg",
+    "mrp": "299.00",
+    "price": "0",
+    "url": "https://www.amazon.in/dp/B0D4QSWG2C",
+    "firstSeenAt": "21-09-2026 23:56:24.829",
+    "createdAt": "2026-09-21T18:26:24.829Z"
+  },
+  {
+    "id": "B0D6W3PL1Y",
+    "title": "TMPE Ayurvedic Massage Oil - Herbal Massage Oil with Clove, Almond, Lemongrass &amp; 6 Ancient Herbs for Muscle Relaxing &amp; Daily Abhyanga Body Care | 300mlTMPE Ayurvedic Massage Oil - Herbal Massage Oil with Clove,…",
+    "image": "https://m.media-amazon.com/images/W/BW_MEDIAX_AVIF_MEASUREMENT_1306696-T1/images/I/410dCa7TCeL._SS210_.jpg",
+    "mrp": "479.00",
+    "price": "0",
+    "url": "https://www.amazon.in/dp/B0D6W3PL1Y",
+    "firstSeenAt": "21-09-2026 23:56:24.829",
+    "createdAt": "2026-09-21T18:26:24.829Z"
+  }
+]
