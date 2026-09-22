@@ -1,5 +1,25 @@
 [
   {
+    "id": "B0DDR5DMK4",
+    "title": "New Amazon Vine Item",
+    "image": "https://via.placeholder.com/300",
+    "mrp": "Check Page",
+    "price": "0",
+    "url": "https://www.amazon.in/dp/B0DDR5DMK4",
+    "firstSeenAt": "22-09-2026 15:35:42.416",
+    "createdAt": "2026-09-22T10:05:42.416Z"
+  },
+  {
+    "id": "B0FVFF9HHL",
+    "title": "New Amazon Vine Item",
+    "image": "https://via.placeholder.com/300",
+    "mrp": "Check Page",
+    "price": "0",
+    "url": "https://www.amazon.in/dp/B0FVFF9HHL",
+    "firstSeenAt": "22-09-2026 15:35:42.416",
+    "createdAt": "2026-09-22T10:05:42.416Z"
+  },
+  {
     "id": "B0F5465P27",
     "title": "New Amazon Vine Item",
     "image": "https://via.placeholder.com/300",
