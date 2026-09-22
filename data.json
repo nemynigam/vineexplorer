@@ -1,5 +1,45 @@
 [
   {
+    "id": "B0DHV11JZV",
+    "title": "New Amazon Vine Item",
+    "image": "https://via.placeholder.com/300",
+    "mrp": "Check Page",
+    "price": "0",
+    "url": "https://www.amazon.in/dp/B0DHV11JZV",
+    "firstSeenAt": "22-09-2026 15:35:27.124",
+    "createdAt": "2026-09-22T10:05:27.124Z"
+  },
+  {
+    "id": "B0GYYXZVR9",
+    "title": "New Amazon Vine Item",
+    "image": "https://via.placeholder.com/300",
+    "mrp": "Check Page",
+    "price": "0",
+    "url": "https://www.amazon.in/dp/B0GYYXZVR9",
+    "firstSeenAt": "22-09-2026 15:35:27.124",
+    "createdAt": "2026-09-22T10:05:27.124Z"
+  },
+  {
+    "id": "B0HBW74L4F",
+    "title": "New Amazon Vine Item",
+    "image": "https://via.placeholder.com/300",
+    "mrp": "Check Page",
+    "price": "0",
+    "url": "https://www.amazon.in/dp/B0HBW74L4F",
+    "firstSeenAt": "22-09-2026 15:35:27.124",
+    "createdAt": "2026-09-22T10:05:27.124Z"
+  },
+  {
+    "id": "B0HBX69L8P",
+    "title": "New Amazon Vine Item",
+    "image": "https://via.placeholder.com/300",
+    "mrp": "Check Page",
+    "price": "0",
+    "url": "https://www.amazon.in/dp/B0HBX69L8P",
+    "firstSeenAt": "22-09-2026 15:35:27.124",
+    "createdAt": "2026-09-22T10:05:27.124Z"
+  },
+  {
     "id": "B0H3BXNP9L",
     "title": "New Amazon Vine Item",
     "image": "https://via.placeholder.com/300",
