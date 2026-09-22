@@ -1,5 +1,15 @@
 [
   {
+    "id": "B0D5RBT5CZ",
+    "title": "New Amazon Vine Item",
+    "image": "https://via.placeholder.com/300?text=No+Image+Available",
+    "mrp": "0",
+    "price": "0",
+    "url": "https://www.amazon.in/dp/B0D5RBT5CZ",
+    "firstSeenAt": "22-09-2026 16:44:11.214",
+    "createdAt": "2026-09-22T11:14:11.214Z"
+  },
+  {
     "id": "B0H1G3SG7R",
     "title": "New Amazon Vine Item",
     "image": "https://via.placeholder.com/300?text=No+Image+Available",
